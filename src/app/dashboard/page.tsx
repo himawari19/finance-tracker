@@ -17,6 +17,21 @@ export default function Dashboard() {
   const [reportDate, setReportDate] = useState(new Date().toISOString().split("T")[0]);
   const router = useRouter();
 
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/check");
+        if (!res.ok) {
+          router.push("/");
+        }
+      } catch (error) {
+        router.push("/");
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   const loadData = async () => {
     try {
       const [transRes, assetsRes] = await Promise.all([
