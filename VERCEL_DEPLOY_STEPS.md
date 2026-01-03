@@ -35,31 +35,32 @@ Klik **"Deploy"** untuk melanjutkan.
 
 ---
 
-## Step 4: Setup Vercel KV Database
+## Step 4: Setup Redis Database (Marketplace)
 
 Setelah deployment selesai:
 
 1. Buka project di Vercel dashboard
 2. Pilih tab **"Storage"**
-3. Klik **"Create Database"** → **"KV"**
-4. Pilih region:
+3. Klik **"Create Database"** → **"Redis"** (di bagian Marketplace Database Providers)
+4. Klik **"Create"**
+5. Pilih plan (free atau berbayar)
+6. Pilih region:
    - **Singapore** (recommended untuk Indonesia)
    - atau region terdekat lainnya
-5. Klik **"Create"**
+7. Klik **"Create"**
 
 ---
 
 ## Step 5: Copy Environment Variables
 
-1. Di tab **"Storage"** → **"KV"**, klik database yang baru dibuat
-2. Klik **".env.local"** atau **"Tokens"**
-3. Copy semua environment variables:
+1. Setelah Redis database dibuat, Vercel akan menampilkan environment variables
+2. Copy semua environment variables:
 
 ```
-KV_URL=...
-KV_REST_API_URL=...
-KV_REST_API_TOKEN=...
-KV_REST_API_READ_ONLY_TOKEN=...
+REDIS_URL=...
+REDIS_REST_API_URL=...
+REDIS_REST_API_TOKEN=...
+REDIS_REST_API_READ_ONLY_TOKEN=...
 ```
 
 ---
@@ -95,7 +96,7 @@ KV_REST_API_READ_ONLY_TOKEN=...
 
 ## ✅ Selesai!
 
-Aplikasi sudah live di Vercel! 🎉
+Aplikasi sudah live di Vercel dengan Redis database! 🎉
 
 ---
 
@@ -128,13 +129,13 @@ Vercel akan **auto-deploy** dalam beberapa detik.
 - Verify environment variables
 - Check TypeScript errors
 
-### Error: "KV_URL is not defined"
+### Error: "REDIS_URL is not defined"
 - Pastikan environment variables sudah di-add
 - Redeploy project
 
 ### Data tidak tersimpan
-- Pastikan Vercel KV database aktif
-- Check di Vercel dashboard → Storage → KV
+- Pastikan Redis database aktif
+- Check di Vercel dashboard → Storage → Redis
 
 ### Login tidak bekerja
 - Clear cookies browser

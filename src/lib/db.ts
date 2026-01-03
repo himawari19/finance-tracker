@@ -1,4 +1,9 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.REDIS_REST_API_URL!,
+  token: process.env.REDIS_REST_API_TOKEN!,
+});
 
 export interface Transaction {
   id: string;
@@ -28,15 +33,18 @@ export async function addTransaction(transaction: Omit<Transaction, "id" | "crea
     id,
     createdAt: new Date().toISOString(),
   };
-  await kv.set(`transaction:${id}`, data);
-  await kv.lpush(`transactions:${transaction.userId}`, id);
+  await redis.set(`transaction:${id}`, JSON.stringify(data));
+  await redis.lpush(`transactions:${transaction.userId}`, id);
   return data;
 }
 
 export async function getTransactions(userId: string) {
-  const ids = await kv.lrange(`transactions:${userId}`, 0, -1);
+  const ids = await redis.lrange(`transactions:${userId}`, 0, -1);
   const transactions = await Promise.all(
-    ids.map((id) => kv.get(`transaction:${id}`))
+    ids.map(async (id) => {
+      const data = await redis.get(`transaction:${id}`);
+      return data ? JSON.parse(data as string) : null;
+    })
   );
   return transactions.filter(Boolean) as Transaction[];
 }
@@ -48,20 +56,23 @@ export async function addAsset(asset: Omit<Asset, "id" | "createdAt">) {
     id,
     createdAt: new Date().toISOString(),
   };
-  await kv.set(`asset:${id}`, data);
-  await kv.lpush(`assets:${asset.userId}`, id);
+  await redis.set(`asset:${id}`, JSON.stringify(data));
+  await redis.lpush(`assets:${asset.userId}`, id);
   return data;
 }
 
 export async function getAssets(userId: string) {
-  const ids = await kv.lrange(`assets:${userId}`, 0, -1);
+  const ids = await redis.lrange(`assets:${userId}`, 0, -1);
   const assets = await Promise.all(
-    ids.map((id) => kv.get(`asset:${id}`))
+    ids.map(async (id) => {
+      const data = await redis.get(`asset:${id}`);
+      return data ? JSON.parse(data as string) : null;
+    })
   );
   return assets.filter(Boolean) as Asset[];
 }
 
 export async function deleteAsset(assetId: string, userId: string) {
-  await kv.del(`asset:${assetId}`);
-  await kv.lrem(`assets:${userId}`, 0, assetId);
+  await redis.del(`asset:${assetId}`);
+  await redis.lrem(`assets:${userId}`, 0, assetId);
 }

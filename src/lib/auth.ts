@@ -1,4 +1,9 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.REDIS_REST_API_URL!,
+  token: process.env.REDIS_REST_API_TOKEN!,
+});
 
 export const users = {
   wahyu: {
@@ -25,12 +30,12 @@ export async function authenticate(username: string, password: string) {
 
 export async function createSession(userId: string) {
   const token = Math.random().toString(36).substring(2, 15);
-  await kv.set(`session:${token}`, { userId }, { ex: 86400 * 7 });
+  await redis.setex(`session:${token}`, 86400 * 7, userId);
   return token;
 }
 
 export async function getSession(token: string) {
   if (!token) return null;
-  const session = await kv.get(`session:${token}`);
-  return session as { userId: string } | null;
+  const userId = await redis.get(`session:${token}`);
+  return userId ? { userId: userId as string } : null;
 }
