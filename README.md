@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pencatat Keuangan
 
-## Getting Started
+Website pencatat keuangan dengan fitur multi-akun, laporan berkala, dan manajemen aset.
 
-First, run the development server:
+## Fitur
 
+- ✅ Login 2 akun (Wahyu & Nurma)
+- ✅ Pencatatan transaksi (Pemasukan/Pengeluaran)
+- ✅ Bank Indonesia (Tradisional & Digital)
+- ✅ Laporan Harian, Mingguan, Bulanan, Tahunan
+- ✅ Manajemen Aset
+- ✅ Data tersimpan di Vercel KV
+
+## Demo Akun
+
+- Username: `wahyu` | Password: `wahyu123`
+- Username: `nurma` | Password: `nurma123`
+
+## Setup
+
+### 1. Clone Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd keuangan
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Setup Vercel KV Database
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Buat akun di [Vercel](https://vercel.com)
+2. Buat project baru atau gunakan project existing
+3. Tambahkan Vercel KV database dari Integrations
+4. Copy environment variables ke `.env.local`:
+   ```
+   KV_URL=
+   KV_REST_API_URL=
+   KV_REST_API_TOKEN=
+   KV_REST_API_READ_ONLY_TOKEN=
+   ```
 
-## Learn More
+### 4. Run Locally
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Buka [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy ke Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1. Push ke GitHub
+```bash
+git add .
+git commit -m "Initial commit"
+git push origin main
+```
 
-## Deploy on Vercel
+### 2. Deploy di Vercel
+1. Buka [Vercel Dashboard](https://vercel.com/dashboard)
+2. Klik "Add New" → "Project"
+3. Import repository GitHub
+4. Vercel akan auto-detect Next.js
+5. Tambahkan environment variables dari Vercel KV
+6. Klik "Deploy"
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Struktur Project
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+keuangan/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/login/
+│   │   │   ├── transactions/
+│   │   │   └── assets/
+│   │   ├── dashboard/
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── LoginForm.tsx
+│   │   ├── TransactionForm.tsx
+│   │   └── AssetForm.tsx
+│   └── lib/
+│       ├── auth.ts
+│       ├── banks.ts
+│       ├── db.ts
+│       └── reports.ts
+├── .env.local
+└── package.json
+```
+
+## Bank yang Tersedia
+
+### Bank Tradisional
+- BCA
+- Mandiri
+- BNI
+- BRI
+- CIMB Niaga
+
+### Bank Digital
+- Jenius
+- Bank Jago
+- Neo Bank
+- OVO
+- DANA
+- GoPay
+
+## Teknologi
+
+- Next.js 15
+- TypeScript
+- Tailwind CSS
+- Vercel KV (Redis)
+- date-fns
+
+## License
+
+MIT
