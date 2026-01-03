@@ -1,25 +1,22 @@
-import { Redis } from "@upstash/redis";
+import { createClient } from "redis";
 
 // Create Redis client only if REDIS_URL is available
-let redis: Redis | null = null;
+let redis: ReturnType<typeof createClient> | null = null;
 
 try {
   if (process.env.REDIS_URL) {
-    // REDIS_URL format: redis://:token@host:port
-    // We need to extract and set proper env vars for Upstash
-    const redisUrl = process.env.REDIS_URL;
-    const urlObj = new URL(redisUrl);
-    const token = urlObj.password;
-    const host = urlObj.hostname;
-    const port = urlObj.port || "6379";
+    // REDIS_URL format: redis://default:PASSWORD@HOST:PORT
+    redis = createClient({
+      url: process.env.REDIS_URL,
+    });
     
-    // Set environment variables that Upstash expects
-    process.env.UPSTASH_REDIS_REST_URL = `https://${host}`;
-    process.env.UPSTASH_REDIS_REST_TOKEN = token;
+    // Connect to Redis
+    redis.connect().catch((error) => {
+      console.warn("Redis connection failed:", error);
+      redis = null;
+    });
     
-    // Now create Redis client using fromEnv
-    redis = Redis.fromEnv();
-    console.log("Redis connected successfully");
+    console.log("Redis client created");
   }
 } catch (error) {
   console.warn("Redis initialization failed, using in-memory storage:", error);
@@ -92,7 +89,7 @@ async function redisDel(key: string) {
 async function redisLpush(key: string, value: string) {
   if (redis) {
     try {
-      await redis.lpush(key, value);
+      await redis.lPush(key, value);
     } catch (error) {
       console.warn("Redis lpush failed, using in-memory storage:", error);
       const list = dataStore.get(key);
@@ -111,7 +108,7 @@ async function redisLpush(key: string, value: string) {
 async function redisLrange(key: string, start: number, end: number) {
   if (redis) {
     try {
-      return await redis.lrange(key, start, end);
+      return await redis.lRange(key, start, end);
     } catch (error) {
       console.warn("Redis lrange failed, checking in-memory storage:", error);
       const list = dataStore.get(key);
@@ -128,7 +125,7 @@ async function redisLrange(key: string, start: number, end: number) {
 async function redisLrem(key: string, count: number, value: string) {
   if (redis) {
     try {
-      await redis.lrem(key, count, value);
+      await redis.lRem(key, count, value);
     } catch (error) {
       console.warn("Redis lrem failed, using in-memory storage:", error);
       const list = dataStore.get(key);

@@ -1,25 +1,22 @@
-import { Redis } from "@upstash/redis";
+import { createClient } from "redis";
 
 // Create Redis client only if REDIS_URL is available
-let redis: Redis | null = null;
+let redis: ReturnType<typeof createClient> | null = null;
 
 try {
   if (process.env.REDIS_URL) {
-    // REDIS_URL format: redis://:token@host:port
-    // We need to extract and set proper env vars for Upstash
-    const redisUrl = process.env.REDIS_URL;
-    const urlObj = new URL(redisUrl);
-    const token = urlObj.password;
-    const host = urlObj.hostname;
-    const port = urlObj.port || "6379";
+    // REDIS_URL format: redis://default:PASSWORD@HOST:PORT
+    redis = createClient({
+      url: process.env.REDIS_URL,
+    });
     
-    // Set environment variables that Upstash expects
-    process.env.UPSTASH_REDIS_REST_URL = `https://${host}`;
-    process.env.UPSTASH_REDIS_REST_TOKEN = token;
+    // Connect to Redis
+    redis.connect().catch((error) => {
+      console.warn("Redis connection failed:", error);
+      redis = null;
+    });
     
-    // Now create Redis client using fromEnv
-    redis = Redis.fromEnv();
-    console.log("Redis connected successfully");
+    console.log("Redis client created");
   }
 } catch (error) {
   console.warn("Redis initialization failed, using in-memory storage:", error);
@@ -58,9 +55,9 @@ export async function createSession(userId: string) {
   if (redis) {
     try {
       // Production: use Redis
-      await redis.setex(`session:${token}`, 86400 * 7, userId);
+      await redis.setEx(`session:${token}`, 86400 * 7, userId);
     } catch (error) {
-      console.warn("Redis setex failed, using in-memory storage:", error);
+      console.warn("Redis setEx failed, using in-memory storage:", error);
       sessionStore.set(`session:${token}`, userId);
       setTimeout(() => sessionStore.delete(`session:${token}`), 86400 * 7 * 1000);
     }
@@ -82,7 +79,7 @@ export async function getSession(token: string) {
   if (redis) {
     try {
       // Production: use Redis
-      userId = (await redis.get(`session:${token}`)) as string | null;
+      userId = await redis.get(`session:${token}`);
     } catch (error) {
       console.warn("Redis get failed, checking in-memory storage:", error);
       userId = sessionStore.get(`session:${token}`) || null;
