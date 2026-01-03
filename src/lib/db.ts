@@ -6,16 +6,17 @@ let redis: Redis | null = null;
 try {
   if (process.env.REDIS_URL) {
     // Parse REDIS_URL: redis://:token@host:port
-    const url = new URL(process.env.REDIS_URL);
-    const token = url.password;
-    const host = url.hostname;
-    const port = url.port || "6379";
+    // Extract token and construct REST API URL
+    const redisUrl = process.env.REDIS_URL;
+    const urlObj = new URL(redisUrl);
+    const token = urlObj.password;
+    const host = urlObj.hostname;
     
-    // Create REST API URL from parsed components
-    const restUrl = `https://${host}:${port}`;
+    // Upstash REST API URL format
+    const restApiUrl = `https://${host}`;
     
     redis = new Redis({
-      url: restUrl,
+      url: restApiUrl,
       token: token,
     });
     console.log("Redis connected successfully");
