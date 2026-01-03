@@ -6,6 +6,7 @@ let redis: Redis | null = null;
 try {
   if (process.env.REDIS_URL) {
     redis = Redis.fromEnv();
+    console.log("Redis connected successfully");
   }
 } catch (error) {
   console.warn("Redis initialization failed, using in-memory storage:", error);
