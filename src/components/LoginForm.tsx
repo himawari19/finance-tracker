@@ -22,14 +22,19 @@ export default function LoginForm() {
         body: JSON.stringify({ username, password }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        setError("Username atau password salah");
+        setError(data.error || "Username atau password salah");
+        console.error("Login error:", data);
         return;
       }
 
       router.push("/dashboard");
     } catch (err) {
-      setError("Terjadi kesalahan");
+      const errorMsg = err instanceof Error ? err.message : "Terjadi kesalahan";
+      setError(errorMsg);
+      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }
