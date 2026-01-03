@@ -1,9 +1,7 @@
 import { Redis } from "@upstash/redis";
 
-const redis = new Redis({
-  url: process.env.REDIS_REST_API_URL!,
-  token: process.env.REDIS_REST_API_TOKEN!,
-});
+// Upstash Redis automatically reads from REDIS_URL environment variable
+const redis = Redis.fromEnv();
 
 export interface Transaction {
   id: string;

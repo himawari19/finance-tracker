@@ -1,9 +1,7 @@
 import { Redis } from "@upstash/redis";
 
-const redis = new Redis({
-  url: process.env.REDIS_REST_API_URL!,
-  token: process.env.REDIS_REST_API_TOKEN!,
-});
+// Parse REDIS_URL format: redis://:token@host:port
+const redis = Redis.fromEnv();
 
 export const users = {
   wahyu: {
