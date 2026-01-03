@@ -1,7 +1,11 @@
 import { Redis } from "@upstash/redis";
 
-// Parse REDIS_URL format: redis://:token@host:port
-const redis = Redis.fromEnv();
+// Create Redis client only if REDIS_URL is available
+let redis: Redis | null = null;
+
+if (process.env.REDIS_URL) {
+  redis = Redis.fromEnv();
+}
 
 export const users = {
   wahyu: {
@@ -18,6 +22,9 @@ export const users = {
   },
 };
 
+// In-memory session storage for development
+const sessionStore = new Map<string, string>();
+
 export async function authenticate(username: string, password: string) {
   const user = users[username as keyof typeof users];
   if (user && user.password === password) {
@@ -28,12 +35,32 @@ export async function authenticate(username: string, password: string) {
 
 export async function createSession(userId: string) {
   const token = Math.random().toString(36).substring(2, 15);
-  await redis.setex(`session:${token}`, 86400 * 7, userId);
+  
+  if (redis) {
+    // Production: use Redis
+    await redis.setex(`session:${token}`, 86400 * 7, userId);
+  } else {
+    // Development: use in-memory storage
+    sessionStore.set(`session:${token}`, userId);
+    // Auto-expire after 7 days
+    setTimeout(() => sessionStore.delete(`session:${token}`), 86400 * 7 * 1000);
+  }
+  
   return token;
 }
 
 export async function getSession(token: string) {
   if (!token) return null;
-  const userId = await redis.get(`session:${token}`);
-  return userId ? { userId: userId as string } : null;
+  
+  let userId: string | null = null;
+  
+  if (redis) {
+    // Production: use Redis
+    userId = (await redis.get(`session:${token}`)) as string | null;
+  } else {
+    // Development: use in-memory storage
+    userId = sessionStore.get(`session:${token}`) || null;
+  }
+  
+  return userId ? { userId } : null;
 }
