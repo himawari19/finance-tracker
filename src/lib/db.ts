@@ -5,7 +5,19 @@ let redis: Redis | null = null;
 
 try {
   if (process.env.REDIS_URL) {
-    redis = Redis.fromEnv();
+    // Parse REDIS_URL: redis://:token@host:port
+    const url = new URL(process.env.REDIS_URL);
+    const token = url.password;
+    const host = url.hostname;
+    const port = url.port || "6379";
+    
+    // Create REST API URL from parsed components
+    const restUrl = `https://${host}:${port}`;
+    
+    redis = new Redis({
+      url: restUrl,
+      token: token,
+    });
     console.log("Redis connected successfully");
   }
 } catch (error) {
