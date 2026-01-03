@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String     @id @default(cuid())
+  name  String
+  email String     @unique
+  password String
+  transactions Transaction[]
+  assets Asset[]
+  sessions Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id    String     @id @default(cuid())
+  token String     @unique
+  userId String
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id    String     @id @default(cuid())
+  userId String
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type  String     // "income" or "expense"
+  amount Float
+  bank  String
+  category String
+  description String?
+  date  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+}
+
+model Asset {
+  id    String     @id @default(cuid())
+  userId String
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name  String
+  bank  String
+  amount Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
