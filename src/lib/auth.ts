@@ -3,8 +3,13 @@ import { Redis } from "@upstash/redis";
 // Create Redis client only if REDIS_URL is available
 let redis: Redis | null = null;
 
-if (process.env.REDIS_URL) {
-  redis = Redis.fromEnv();
+try {
+  if (process.env.REDIS_URL) {
+    redis = Redis.fromEnv();
+  }
+} catch (error) {
+  console.warn("Redis initialization failed, using in-memory storage:", error);
+  redis = null;
 }
 
 export const users = {
@@ -37,8 +42,14 @@ export async function createSession(userId: string) {
   const token = Math.random().toString(36).substring(2, 15);
   
   if (redis) {
-    // Production: use Redis
-    await redis.setex(`session:${token}`, 86400 * 7, userId);
+    try {
+      // Production: use Redis
+      await redis.setex(`session:${token}`, 86400 * 7, userId);
+    } catch (error) {
+      console.warn("Redis setex failed, using in-memory storage:", error);
+      sessionStore.set(`session:${token}`, userId);
+      setTimeout(() => sessionStore.delete(`session:${token}`), 86400 * 7 * 1000);
+    }
   } else {
     // Development: use in-memory storage
     sessionStore.set(`session:${token}`, userId);
@@ -55,8 +66,13 @@ export async function getSession(token: string) {
   let userId: string | null = null;
   
   if (redis) {
-    // Production: use Redis
-    userId = (await redis.get(`session:${token}`)) as string | null;
+    try {
+      // Production: use Redis
+      userId = (await redis.get(`session:${token}`)) as string | null;
+    } catch (error) {
+      console.warn("Redis get failed, checking in-memory storage:", error);
+      userId = sessionStore.get(`session:${token}`) || null;
+    }
   } else {
     // Development: use in-memory storage
     userId = sessionStore.get(`session:${token}`) || null;
