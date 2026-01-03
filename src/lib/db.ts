@@ -55,7 +55,7 @@ export async function getTransactions(userId: string) {
     orderBy: { date: "desc" },
   });
 
-  return transactions.map((t) => ({
+  return transactions.map((t: any) => ({
     id: t.id,
     userId: t.userId,
     type: t.type,
@@ -94,7 +94,7 @@ export async function getAssets(userId: string) {
     orderBy: { createdAt: "desc" },
   });
 
-  return assets.map((a) => ({
+  return assets.map((a: any) => ({
     id: a.id,
     userId: a.userId,
     name: a.name,
