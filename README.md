@@ -1,6 +1,6 @@
 # 💰 Finance Tracker - Pencatat Keuangan
 
-Website pencatat keuangan dengan fitur multi-akun, laporan berkala, dan manajemen aset. Dibangun dengan Next.js 15, TypeScript, dan Vercel KV.
+Website pencatat keuangan dengan fitur multi-akun, laporan berkala, dan manajemen aset. Dibangun dengan Next.js 15, TypeScript, dan PostgreSQL.
 
 ![Status](https://img.shields.io/badge/status-ready-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -17,7 +17,7 @@ Website pencatat keuangan dengan fitur multi-akun, laporan berkala, dan manajeme
 - ✅ **Manajemen Aset:** Daftar aset per bank dengan total otomatis
 - ✅ **Dashboard:** Overview total aset, pemasukan, pengeluaran
 - ✅ **Responsive Design:** Bekerja di desktop, tablet, mobile
-- ✅ **Data Persisten:** Tersimpan di Vercel KV (Redis)
+- ✅ **Data Persisten:** Tersimpan di PostgreSQL (Vercel)
 
 ---
 
@@ -33,10 +33,13 @@ cd finance-tracker
 # 2. Install dependencies
 npm install
 
-# 3. Run development server
+# 3. Setup environment
+# Buat file .env.local dengan DATABASE_URL dari Vercel PostgreSQL
+
+# 4. Run development server
 npm run dev
 
-# 4. Buka browser
+# 5. Buka browser
 # http://localhost:3000
 ```
 
@@ -75,7 +78,8 @@ npm run dev
 | Framework | Next.js 15 |
 | Language | TypeScript |
 | Styling | Tailwind CSS |
-| Database | Vercel KV (Redis) |
+| Database | PostgreSQL (Vercel) |
+| ORM | Prisma v6 |
 | Authentication | Custom (Cookie-based) |
 | Date Handling | date-fns |
 | Deployment | Vercel |
@@ -102,10 +106,13 @@ finance-tracker/
 │   │   ├── auth.ts
 │   │   ├── banks.ts
 │   │   ├── db.ts
+│   │   ├── prisma.ts
 │   │   └── reports.ts
 │   └── middleware.ts
+├── prisma/
+│   └── schema.prisma
 ├── public/
-├── .env.local
+├── .env.local (local only, not in git)
 ├── vercel.json
 ├── package.json
 └── tsconfig.json
@@ -113,39 +120,23 @@ finance-tracker/
 
 ---
 
-## 📚 Dokumentasi
-
-- **[00_START_HERE.md](./00_START_HERE.md)** - Entry point utama
-- **[GETTING_STARTED.md](./GETTING_STARTED.md)** - Setup cepat
-- **[SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)** - Panduan lengkap
-- **[VERCEL_DEPLOY_STEPS.md](./VERCEL_DEPLOY_STEPS.md)** - Deploy ke Vercel
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide
-- **[DOCS_INDEX.md](./DOCS_INDEX.md)** - Index dokumentasi
-
----
-
 ## 🌐 Deploy ke Vercel
 
-### Step 1: Setup Vercel KV Database
+### Step 1: Setup PostgreSQL Database
 1. Buka https://vercel.com
 2. Buat project baru atau gunakan existing
-3. Di tab "Storage", buat Vercel KV database
-4. Copy environment variables
+3. Dapatkan DATABASE_URL dari Vercel PostgreSQL
 
 ### Step 2: Add Environment Variables
+Di Vercel dashboard → Settings → Environment Variables:
 ```
-KV_URL=
-KV_REST_API_URL=
-KV_REST_API_TOKEN=
-KV_REST_API_READ_ONLY_TOKEN=
+DATABASE_URL=postgres://...
 ```
 
 ### Step 3: Deploy
 1. Vercel akan auto-detect Next.js
 2. Klik "Deploy"
 3. Tunggu hingga selesai
-
-Lihat [VERCEL_DEPLOY_STEPS.md](./VERCEL_DEPLOY_STEPS.md) untuk detail lengkap.
 
 ---
 
@@ -163,6 +154,10 @@ npm run build
 
 # Check code quality
 npm run lint
+
+# Prisma commands
+npx prisma migrate dev --name init
+npx prisma studio
 ```
 
 ---
@@ -190,6 +185,7 @@ npm run lint
 - ✅ User data isolation
 - ✅ Session expiration (7 days)
 - ✅ HTTPS on Vercel
+- ✅ Environment variables tidak di-commit ke git
 
 ---
 
@@ -205,13 +201,13 @@ npm install
 npm run dev -- -p 3001
 ```
 
-### Error: "KV_URL is not defined"
+### Error: "DATABASE_URL is not defined"
 - Pastikan environment variables sudah di-add di Vercel
 - Redeploy project
 
 ### Data tidak tersimpan
-- Pastikan Vercel KV database aktif
-- Check di Vercel dashboard → Storage → KV
+- Pastikan PostgreSQL database aktif
+- Check di Vercel dashboard → Storage → Postgres
 
 ---
 
@@ -259,9 +255,7 @@ export const banks = {
 
 ## 📞 Support
 
-- 📖 Dokumentasi: [DOCS_INDEX.md](./DOCS_INDEX.md)
-- 🚀 Quick Start: [GETTING_STARTED.md](./GETTING_STARTED.md)
-- 🌐 Deploy: [VERCEL_DEPLOY_STEPS.md](./VERCEL_DEPLOY_STEPS.md)
+Untuk bantuan, lihat dokumentasi di repository atau buat issue di GitHub.
 
 ---
 
