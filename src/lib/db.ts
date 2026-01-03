@@ -5,20 +5,20 @@ let redis: Redis | null = null;
 
 try {
   if (process.env.REDIS_URL) {
-    // Parse REDIS_URL: redis://:token@host:port
-    // Extract token and construct REST API URL
+    // REDIS_URL format: redis://:token@host:port
+    // We need to extract and set proper env vars for Upstash
     const redisUrl = process.env.REDIS_URL;
     const urlObj = new URL(redisUrl);
     const token = urlObj.password;
     const host = urlObj.hostname;
+    const port = urlObj.port || "6379";
     
-    // Upstash REST API URL format
-    const restApiUrl = `https://${host}`;
+    // Set environment variables that Upstash expects
+    process.env.UPSTASH_REDIS_REST_URL = `https://${host}`;
+    process.env.UPSTASH_REDIS_REST_TOKEN = token;
     
-    redis = new Redis({
-      url: restApiUrl,
-      token: token,
-    });
+    // Now create Redis client using fromEnv
+    redis = Redis.fromEnv();
     console.log("Redis connected successfully");
   }
 } catch (error) {
